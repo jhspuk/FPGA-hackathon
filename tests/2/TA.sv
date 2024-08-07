@@ -12,7 +12,7 @@ module ta(
 	input wire rand_clk,
 	input wire rand_in,
 
-	output wire ready;
+	output wire ready,
 	output wire done,
 	output reg rand_out,
 	output reg ta_result
@@ -21,8 +21,8 @@ module ta(
 
 	logic [2:0] internal_weight;
 
-	enum int unsigned [2:0] {INFERENCE, TRAIN, FEEDBACK, OUT} state;
-	enum int unsigned [1:0] {REW, PEN, IGN} train_state;
+	enum logic [1:0] {INFERENCE, TRAIN, FEEDBACK, OUT} state;
+	enum logic [1:0] {REW, PEN, IGN} train_state;
 
 	assign ready = (state == INFERENCE);
 	assign done = (state == OUT);
@@ -39,6 +39,8 @@ module ta(
 					ta_result <= literal_in || (internal_weight > 3'b010);
 					state <= OUT;
 				end
+				default: state <= INFERENCE;
+			endcase
 		end else if(enable && training_sel) begin
 			case (state)
 				INFERENCE: begin
@@ -47,7 +49,7 @@ module ta(
 				end
 				TRAIN: begin
 					if (!type_feedback) begin
-						if (!(clause_result ^ (internal_weight > 3'b010)) begin
+						if (!(clause_result) ^ (internal_weight > 3'b010)) begin
 							train_state <= REW;
 						end else if ((!clause_result) && (internal_weight > 3'b010)) begin
 							train_state <= PEN;
@@ -79,6 +81,8 @@ module ta(
 	
 					end
 				end
+				default: state <= INFERENCE;
+			endcase
 		end else if(!enable) begin
 			state = INFERENCE;
 		end
