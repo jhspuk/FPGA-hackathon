@@ -18,8 +18,10 @@ module ta(
 	output reg ta_result
 );
 
-
 	logic [2:0] internal_weight;
+	
+	initial internal_weight = 3'b010;
+	initial rand_out = 1'b1;
 
 	enum logic [1:0] {INFERENCE, TRAIN, FEEDBACK, OUT} state;
 	enum logic [1:0] {REW, PEN, IGN} train_state;
